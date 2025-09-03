@@ -18,12 +18,16 @@ class AuctionCRUD:
                 **lot_data.model_dump(),
                 current_price=lot_data.start_price
             )
-            .returning(Lot)
+            .returning(
+                Lot.id, Lot.title, Lot.description, Lot.status,
+                Lot.start_price, Lot.current_price, Lot.created_at, Lot.updated_at
+            )
         )
         result = await db.execute(stmt)
         await db.commit()
 
-        created_lot = result.scalar_one()
+        created_lot = result.mappings().one()
+
         lot_dict = LotSchema.model_validate(created_lot).model_dump(mode="json")
 
         return lot_dict
